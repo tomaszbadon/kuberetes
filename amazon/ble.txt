@@ -1,0 +1,44 @@
+eksctl create cluster \
+--name fargate-cluster \
+--region eu-west-3 \
+--version 1.27 \
+--fargate
+
+aws eks update-kubeconfig --region eu-west-3 --name fargate-cluster
+
+curl -O https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.5.4/docs/install/iam_policy.json
+
+aws iam create-policy \
+    --policy-name AWSLoadBalancerControllerIAMPolicy \
+    --policy-document file://iam_policy.json
+
+cluster_name=fargate-cluster
+
+oidc_id=$(aws eks describe-cluster --name $cluster_name --query "cluster.identity.oidc.issuer" --output text | cut -d '/' -f 5)
+
+echo $oidc_id -> //DF04C52BE000011C4D32247008C24602
+
+aws iam list-open-id-connect-providers | grep $oidc_id | cut -d "/" -f4
+
+if empty -> eksctl utils associate-iam-oidc-provider --cluster $cluster_name --approve
+
+
+eksctl create iamserviceaccount \
+  --cluster=fargate-cluster \
+  --namespace=kube-system \
+  --name=aws-load-balancer-controller \
+  --role-name AmazonEKSLoadBalancerControllerRole \
+  --attach-policy-arn=arn:aws:iam::141643165132:policy/AWSLoadBalancerControllerIAMPolicy \
+  --approve
+
+wget https://get.helm.sh/helm-v3.2.0-linux-amd64.tar.gz
+
+tar -zxvf helm-v3.2.0-linux-amd64.tar.gz
+
+helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
+  -n kube-system \
+  --set clusterName=fargate-cluster \
+  --set serviceAccount.create=false \
+  --set serviceAccount.name=aws-load-balancer-controller \
+  --set region=eu-west-3 \
+  --set vpcId=vpc-0ea3713146c2cddac \

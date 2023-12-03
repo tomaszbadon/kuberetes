@@ -1,0 +1,45 @@
+
+echo -n ‚value’ | base64
+
+kubectl get services -> minikube service <service_name>
+
+kubectl logs <pod_name>  
+
+kubectl exec --stdin --tty mysql-db76df678-t9hvp -- /bin/bash
+
+kubectl port-forward mongodb-deployment-66c86bb4-4lqv2 32000:27017
+
+kubectl run -it --rm debug --image=tutum/dnsutils --restart=Never nslookup normal-nginx
+
+kubectl run -i --tty --image busybox:1.28 dns-test --restart=Never --rm
+
+nslookup web-0.nginx
+
+Kubctl get endpoints
+
+podname-{replica-index}.{serviceName}.default.svc.cluster.local
+
+mongodb-0.mongo.default.svc.cluster.local
+
+rs.initiate(
+    {
+       _id: "rs0",
+       version: 1,
+       members: [
+          { _id: 0, host : "mongo-0.mongo.default.svc.cluster.local:27017" },
+          { _id: 1, host : "mongo-1.mongo.default.svc.cluster.local:27017" },
+          { _id: 2, host : "mongo-2.mongo.default.svc.cluster.local:27017" }
+       ]
+    }
+ )
+
+ #use admin
+
+ db.createUser(
+   {
+       user: "admin",
+       pwd: "password",
+       roles: [ "root" ]
+   })
+
+kubectl port-forward mongo-0 28015:27017

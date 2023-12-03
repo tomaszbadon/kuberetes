@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: default
+  name: minimal-ingress
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/subnets: subnet-0c5d57a7d30a86fa0,subnet-04679bae4cbad3eb3,subnet-0d431446c2be80a93
+spec:
+  defaultBackend:
+    service:
+      name: mongo-express-service
+      port:
+        number: 8081
+  ingressClassName: alb
+  rules:
+    - http:
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: mongo-express-service
+              port:
+                number: 8081
